@@ -23,4 +23,27 @@ enum {
 
 enum { FALSE, TRUE };
 
+typedef struct {
+
+	int pieces[BRD_SQ_NUM];
+	U64 pawns[3];
+
+	int KingSq[2];
+
+	int side; //side to move
+	int enPas; //position 
+	int fiftyMove; //fiftyMove counter. if counter equals 50 -> game over with draw (our case 100 move cause we use half moves)
+
+	int play; //half moves current 
+	int hisPlay; //total half move
+
+	U64 posKey; //unic key for each positions 
+
+	int pceNum[13]; //number of paces on the board
+	int bigPce[3]; //color (все что не пешка(не знаю как будет пешка по английски))
+	int majgPce[3]; //ладьи и ферзи
+	int minPce[3]; //слоны и кони
+
+} S_BOARD;
+
 #endif
