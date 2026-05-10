@@ -6,10 +6,14 @@ typedef unsigned long long U64;
 #define NAME "Vise 1.0"
 #define BRD_SQ_NUM 120
 
+#define MAXGAMEMOVES 2048 //учитываются полуходы 
+
 enum { EMPTY, wP, wN, wB, wR, wK, bP, bN, bB, bR, bK };
 enum { FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H, FILE_NONE };
 enum { RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8, RANK_NONE };
+
 enum { WHITE, BLACK, BOTH };
+
 enum {
 	A1 = 21, B1, C1, D1, E1, F1, G1, H1,
 	A2 = 31, B2, C2, D2, E2, F2, G2, H2,
@@ -22,6 +26,18 @@ enum {
 };
 
 enum { FALSE, TRUE };
+
+enum { WKCA =1, WQCA = 2, BKCA = 4, BQCA = 8};
+
+typedef struct {
+	
+	int move;
+	int castlePerm;
+	int enPas;
+	int fiftyMove;
+	U64 posKey;
+
+} S_UNDO; //info about history for canceling move
 
 typedef struct {
 
@@ -37,12 +53,16 @@ typedef struct {
 	int play; //half moves current 
 	int hisPlay; //total half move
 
+	int castlePerm; //разрешение на рокировку
+
 	U64 posKey; //unic key for each positions 
 
 	int pceNum[13]; //number of paces on the board
 	int bigPce[3]; //color (все что не пешка(не знаю как будет пешка по английски))
 	int majgPce[3]; //ладьи и ферзи
 	int minPce[3]; //слоны и кони
+
+	S_UNDO history[MAXGAMEMOVES];
 
 } S_BOARD;
 
