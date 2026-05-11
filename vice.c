@@ -1,6 +1,7 @@
 #include "studio.h"
 #include "defs.h"
 
+
 int main() {
 
 	AllInit();
