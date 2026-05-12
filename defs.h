@@ -27,6 +27,18 @@ typedef unsigned long long U64;
 #define BRD_SQ_NUM 120
 
 #define MAXGAMEMOVES 2048 //учитываются полуходы 
+#define MAXPOSITIONMOVES 256
+#define MAXDEPTH 64
+#define MAXTHREADS 32
+
+#define START_FEN  "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+#define FINE_70 "8/k7/3p4/p2P1p2/P2P1P2/8/8/K7 w - -"
+#define WAC_2 "8/7p/5k2/5p2/p1p2P2/Pr1pPK2/1P1R3P/8 b - -"
+#define LCT_1 "r3kb1r/3n1pp1/p6p/2pPp2q/Pp2N3/3B2PP/1PQ2P2/R3K2R w KQkq -"
+
+#define INF_BOUND 32000
+#define AB_BOUND 30000
+#define ISMATE (AB_BOUND - MAXDEPTH)
 
 enum { EMPTY, wP, wN, wB, wR, wK, bP, bN, bB, bR, bK };
 enum { FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H, FILE_NONE };
@@ -48,6 +60,27 @@ enum {
 enum { FALSE, TRUE };
 
 enum { WKCA =1, WQCA = 2, BKCA = 4, BQCA = 8};
+
+typedef struct {
+	/*U64 posKey;
+	int move;
+	int score;
+	int depth;
+	int flags;*/
+	int age;
+	U64 smp_data;
+	U64 smp_key;
+} S_HASHENTRY;
+
+typedef struct {
+	S_HASHENTRY* pTable;
+	int numEntries;
+	int newWrite;
+	int overWrite;
+	int hit;
+	int cut;
+	int currentAge;
+} S_HASHTABLE;
 
 typedef struct {
 	
@@ -87,7 +120,69 @@ typedef struct {
 	// piece list
 	int pList[13][10];
 
+	int PvArray[MAXDEPTH];
+
+	int searchHistory[13][BRD_SQ_NUM];
+	int searchKillers[2][MAXDEPTH];
+
 } S_BOARD;
+
+typedef struct {
+
+	int starttime;
+	int stoptime;
+	int depth;
+	int timeset;
+	int movestogo;
+
+	long nodes;
+
+	int quit;
+	int stopped;
+
+	float fh;
+	float fhf;
+	int nullCut;
+
+	int threadNum;
+
+} S_SEARCHINFO;
+
+typedef struct {
+	int UseBook;
+} S_OPTIONS;
+
+
+typedef struct {
+	S_SEARCHINFO* info;
+	S_BOARD* originalPosition;
+	S_HASHTABLE* ttable;
+} S_SEARCH_THREAD_DATA;
+
+
+typedef struct {
+	S_BOARD* pos;
+	S_SEARCHINFO* info;
+	S_HASHTABLE* ttable;
+
+	int threadNumber;
+	int depth;
+	int bestMove;
+} S_SEARCH_WORKER_DATA;
+
+#define FROMSQ(m) ((m) & 0x7F)
+#define TOSQ(m) (((m)>>7) & 0x7F)
+#define CAPTURED(m) (((m)>>14) & 0xF)
+#define PROMOTED(m) (((m)>>20) & 0xF)
+
+#define MFLAGEP 0x40000
+#define MFLAGPS 0x80000
+#define MFLAGCA 0x1000000
+
+#define MFLAGCAP 0x7C000
+#define MFLAGPROM 0xF00000
+
+#define NOMOVE 0
 
 /* MACROS */
 
@@ -98,6 +193,15 @@ typedef struct {
 #define CLRBIT(bb,sq) ((bb) &= ClearMask[(sq)])
 #define SETBIT(bb,sq) ((bb) |= SetMask[(sq)])
 
+#define IsBQ(p) (PieceBishopQueen[(p)])
+#define IsRQ(p) (PieceRookQueen[(p)])
+#define IsKn(p) (PieceKnight[(p)])
+#define IsKi(p) (PieceKing[(p)])
+
+#define MIRROR64(sq) (Mirror64[(sq)])
+
+
+
 /* GLOBALS */
 
 extern int Sq120ToSq64[BRD_SQ_NUM];
@@ -107,14 +211,89 @@ extern U64 ClearMask[64];
 extern U64 PieceKeys[13][120];
 extern U64 SideKey;
 extern U64 CastleKeys[16];
+extern char PceChar[];
+extern char SideChar[];
+extern char RankChar[];
+extern char FileChar[];
+
+extern int PieceBig[13];
+extern int PieceMaj[13];
+extern int PieceMin[13];
+extern int PieceVal[13];
+extern int PieceCol[13];
+extern int PiecePawn[13];
+
+extern int FilesBrd[BRD_SQ_NUM];
+extern int RanksBrd[BRD_SQ_NUM];
+
+extern int PieceKnight[13];
+extern int PieceKing[13];
+extern int PieceRookQueen[13];
+extern int PieceBishopQueen[13];
+extern int PieceSlides[13];
+
+extern int Mirror64[64];
+
+extern U64 FileBBMask[8];
+extern U64 RankBBMask[8];
+
+extern U64 BlackPassedMask[64];
+extern U64 WhitePassedMask[64];
+extern U64 IsolatedMask[64];
+
+extern S_OPTIONS EngineOptions[1];
+extern S_HASHTABLE HashTable[1];
 
 /*FUNCTIONS*/
 
 extern void AllInit();
+
 extern void PrintBitBoard(U64 bb);
 extern int PopBit(U64* bb);
 extern int CountBits(U64 b);
 
 extern U64 GeneratePosKey(const S_BOARD* pos);
+
+extern void ResetBoard(S_BOARD* pos);
+extern int ParseFen(char* fen, S_BOARD* pos);
+extern void PrintBoard(const S_BOARD* pos);
+extern void UpdateListsMaterial(S_BOARD* pos);
+extern int CheckBoard(const S_BOARD* pos);
+extern void MirrorBoard(S_BOARD* pos);
+
+extern int SqAttacked(const int sq, const int side, const S_BOARD* pos);
+
+extern char* PrMove(const int move);
+extern char* PrSq(const int sq);
+extern void PrintMoveList(const S_MOVELIST* list);
+extern int ParseMove(char* ptrChar, S_BOARD* pos);
+
+extern int SqOnBoard(const int sq);
+extern int SideValid(const int side);
+extern int FileRankValid(const int fr);
+extern int PieceValidEmpty(const int pce);
+extern int PieceValid(const int pce);
+extern void MirrorEvalTest(S_BOARD* pos);
+extern int SqIs120(const int sq);
+extern int PceValidEmptyOffbrd(const int pce);
+extern int MoveListOk(const S_MOVELIST* list, const S_BOARD* pos);
+extern void DebugAnalysisTest(S_BOARD* pos, S_SEARCHINFO* info, S_HASHTABLE* table);
+
+extern void GenerateAllMoves(const S_BOARD* pos, S_MOVELIST* list);
+extern void GenerateAllCaps(const S_BOARD* pos, S_MOVELIST* list);
+extern int MoveExists(S_BOARD* pos, const int move);
+extern void InitMvvLva();
+
+extern int MakeMove(S_BOARD* pos, int move);
+extern void TakeMove(S_BOARD* pos);
+extern void MakeNullMove(S_BOARD* pos);
+extern void TakeNullMove(S_BOARD* pos);
+
+extern void PerftTest(int depth, S_BOARD* pos);
+
+extern void SearchPosition(S_BOARD* pos, S_SEARCHINFO* info, S_HASHTABLE* table);
+extern int SearchPosition_Thread(void* data);
+
+extern int GetTimeMs();
 
 #endif
