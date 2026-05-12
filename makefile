@@ -1,2 +1,5 @@
+SRCS=$(wildcard *.c)
+NAME=vice12
+
 all:
-	gcc vice.c init.c bitboards.c hashkey.c -o vice 
+	gcc $(SRCS) -o $(NAME) -pthread -O2 -Wall -Wextra

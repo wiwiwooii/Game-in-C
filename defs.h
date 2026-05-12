@@ -296,4 +296,22 @@ extern int SearchPosition_Thread(void* data);
 
 extern int GetTimeMs();
 
+extern void TempHashTest(char* fen);
+extern void InitHashTable(S_HASHTABLE* table, const int MB);
+extern void StoreHashEntry(S_BOARD* pos, S_HASHTABLE* table, const int move, int score, const int flags, const int depth);
+extern int ProbeHashEntry(S_BOARD* pos, S_HASHTABLE* table, int* move, int* score, int alpha, int beta, int depth);
+extern int ProbePvMove(const S_BOARD* pos, const S_HASHTABLE* table);
+extern int GetPvLine(const int depth, S_BOARD* pos, const S_HASHTABLE* table);
+extern void ClearHashTable(S_HASHTABLE* table);
+
+extern int EvalPosition(const S_BOARD* pos);
+extern void MirrorEvalTest(S_BOARD* pos);
+
+extern void Uci_Loop(S_BOARD* pos, S_SEARCHINFO* info);
+
+extern int GetBookMove(S_BOARD* board);
+extern void CleanPolyBook();
+extern void InitPolyBook();
+
+
 #endif
