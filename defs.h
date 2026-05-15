@@ -9,7 +9,7 @@
 #define MAX_HASH 1024
 
 #ifndef DEBUG
-#define ASSERT(n)
+#define ASSERT(n) ((void)(n))
 #else
 #define ASSERT(n) \
 if(!(n)) { \
@@ -23,10 +23,10 @@ exit(1);}
 
 typedef unsigned long long U64;
 
-#define NAME "Vise 1.0"
+#define NAME "Vice 1.2"
 #define BRD_SQ_NUM 120
 
-#define MAXGAMEMOVES 2048 //учитываются полуходы 
+#define MAXGAMEMOVES 2048
 #define MAXPOSITIONMOVES 256
 #define MAXDEPTH 64
 #define MAXTHREADS 32
@@ -40,12 +40,11 @@ typedef unsigned long long U64;
 #define AB_BOUND 30000
 #define ISMATE (AB_BOUND - MAXDEPTH)
 
-enum { EMPTY, wP, wN, wB, wR, wK, bP, bN, bB, bR, bK };
+enum { EMPTY, wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK };
 enum { FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H, FILE_NONE };
 enum { RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8, RANK_NONE };
 
 enum { WHITE, BLACK, BOTH };
-
 enum {
 	A1 = 21, B1, C1, D1, E1, F1, G1, H1,
 	A2 = 31, B2, C2, D2, E2, F2, G2, H2,
@@ -54,19 +53,26 @@ enum {
 	A5 = 61, B5, C5, D5, E5, F5, G5, H5,
 	A6 = 71, B6, C6, D6, E6, F6, G6, H6,
 	A7 = 81, B7, C7, D7, E7, F7, G7, H7,
-	A8 = 91, B8, C8, D8, E8, F8, G8, H8,NO_SQ
+	A8 = 91, B8, C8, D8, E8, F8, G8, H8, NO_SQ, OFFBOARD
 };
 
 enum { FALSE, TRUE };
 
-enum { WKCA =1, WQCA = 2, BKCA = 4, BQCA = 8};
+enum { WKCA = 1, WQCA = 2, BKCA = 4, BQCA = 8 };
 
 typedef struct {
-	/*U64 posKey;
 	int move;
 	int score;
-	int depth;
-	int flags;*/
+} S_MOVE;
+
+typedef struct {
+	S_MOVE moves[MAXPOSITIONMOVES];
+	int count;
+} S_MOVELIST;
+
+enum { HFNONE, HFALPHA, HFBETA, HFEXACT };
+
+typedef struct {
 	int age;
 	U64 smp_data;
 	U64 smp_key;
@@ -83,14 +89,14 @@ typedef struct {
 } S_HASHTABLE;
 
 typedef struct {
-	
+
 	int move;
 	int castlePerm;
 	int enPas;
 	int fiftyMove;
 	U64 posKey;
 
-} S_UNDO; //info about history for canceling move
+} S_UNDO;
 
 typedef struct {
 
@@ -99,25 +105,25 @@ typedef struct {
 
 	int KingSq[2];
 
-	int side; //side to move
-	int enPas; //position 
-	int fiftyMove; //fiftyMove counter. if counter equals 50 -> game over with draw (our case 100 move cause we use half moves)
+	int side;
+	int enPas;
+	int fiftyMove;
 
-	int play; //half moves current 
-	int hisPlay; //total half move
+	int ply;
+	int hisPly;
 
-	int castlePerm; //разрешение на рокировку
+	int castlePerm;
 
-	U64 posKey; //unic key for each positions 
+	U64 posKey;
 
-	int pceNum[13]; //number of paces on the board
-	int bigPce[3]; //color (все что не пешка(не знаю как будет пешка по английски))
-	int majgPce[3]; //ладьи и ферзи
-	int minPce[3]; //слоны и кони
+	int pceNum[13];
+	int bigPce[2];
+	int majPce[2];
+	int minPce[2];
+	int material[2];
 
 	S_UNDO history[MAXGAMEMOVES];
 
-	// piece list
 	int pList[13][10];
 
 	int PvArray[MAXDEPTH];
@@ -170,6 +176,7 @@ typedef struct {
 	int bestMove;
 } S_SEARCH_WORKER_DATA;
 
+
 #define FROMSQ(m) ((m) & 0x7F)
 #define TOSQ(m) (((m)>>7) & 0x7F)
 #define CAPTURED(m) (((m)>>14) & 0xF)
@@ -184,10 +191,12 @@ typedef struct {
 
 #define NOMOVE 0
 
+
 /* MACROS */
 
 #define FR2SQ(f,r) ( (21 + (f) ) + ( (r) * 10 ) )
 #define SQ64(sq120) (Sq120ToSq64[(sq120)])
+#define SQ120(sq64) (Sq64ToSq120[(sq64)])
 #define POP(b) PopBit(b)
 #define CNT(b) CountBits(b)
 #define CLRBIT(bb,sq) ((bb) &= ClearMask[(sq)])
@@ -199,8 +208,6 @@ typedef struct {
 #define IsKi(p) (PieceKing[(p)])
 
 #define MIRROR64(sq) (Mirror64[(sq)])
-
-
 
 /* GLOBALS */
 
@@ -244,7 +251,7 @@ extern U64 IsolatedMask[64];
 extern S_OPTIONS EngineOptions[1];
 extern S_HASHTABLE HashTable[1];
 
-/*FUNCTIONS*/
+/* FUNCTIONS */
 
 extern void AllInit();
 
@@ -278,7 +285,6 @@ extern int SqIs120(const int sq);
 extern int PceValidEmptyOffbrd(const int pce);
 extern int MoveListOk(const S_MOVELIST* list, const S_BOARD* pos);
 extern void DebugAnalysisTest(S_BOARD* pos, S_SEARCHINFO* info, S_HASHTABLE* table);
-
 extern void GenerateAllMoves(const S_BOARD* pos, S_MOVELIST* list);
 extern void GenerateAllCaps(const S_BOARD* pos, S_MOVELIST* list);
 extern int MoveExists(S_BOARD* pos, const int move);
@@ -312,6 +318,5 @@ extern void Uci_Loop(S_BOARD* pos, S_SEARCHINFO* info);
 extern int GetBookMove(S_BOARD* board);
 extern void CleanPolyBook();
 extern void InitPolyBook();
-
 
 #endif
