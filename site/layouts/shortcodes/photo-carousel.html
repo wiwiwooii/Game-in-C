@@ -1,0 +1,204 @@
+<div class="project-carousel" data-project-carousel>
+  <button class="project-carousel-button project-carousel-prev" type="button" aria-label="Предыдущее изображение">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M15 5L8 12L15 19" />
+    </svg>
+  </button>
+
+  <div class="project-carousel-window">
+    <div class="project-carousel-track">
+      {{ range .Params }}
+        <div class="project-carousel-slide">
+          <img src="{{ . }}" alt="Экран приложения">
+        </div>
+      {{ end }}
+    </div>
+  </div>
+
+  <button class="project-carousel-button project-carousel-next" type="button" aria-label="Следующее изображение">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M9 5L16 12L9 19" />
+    </svg>
+  </button>
+</div>
+
+<style>
+  .project-carousel {
+    position: relative;
+    width: 100%;
+    max-width: 920px;
+    margin: 36px auto 10px;
+    padding: 0;
+
+    background: transparent;
+    border: none;
+    box-shadow: none;
+  }
+
+  .project-carousel-window {
+    width: 100%;
+    overflow: hidden;
+
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .project-carousel-track {
+    display: flex;
+    width: 100%;
+    transition: transform 0.35s ease;
+  }
+
+  .project-carousel-slide {
+    min-width: 100%;
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: transparent;
+  }
+
+  .project-carousel-slide img {
+    display: block !important;
+
+    width: auto !important;
+    max-width: 100% !important;
+    height: 620px !important;
+    max-height: 78vh !important;
+
+    object-fit: contain !important;
+
+    margin: 0 auto !important;
+    padding: 0 !important;
+
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .project-carousel-button {
+    all: unset;
+
+    position: absolute;
+    top: 50%;
+    z-index: 10;
+
+    width: 52px;
+    height: 52px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+    cursor: pointer;
+
+    color: #ffffff;
+    background: linear-gradient(135deg, #4f7cff, #315bdc);
+    box-shadow: 0 14px 34px rgba(79, 124, 255, 0.32);
+
+    transform: translateY(-50%);
+    transition: 0.2s ease;
+  }
+
+  .project-carousel-button svg {
+    width: 30px;
+    height: 30px;
+
+    display: block;
+
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 3.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .project-carousel-button:hover {
+    transform: translateY(-50%) scale(1.08);
+    box-shadow: 0 18px 42px rgba(79, 124, 255, 0.42);
+  }
+
+  .project-carousel-prev {
+    left: 12px;
+  }
+
+  .project-carousel-next {
+    right: 12px;
+  }
+
+  @media (max-width: 760px) {
+    .project-carousel {
+      max-width: 100%;
+    }
+
+    .project-carousel-slide img {
+      height: 430px !important;
+    }
+
+    .project-carousel-button {
+      width: 42px;
+      height: 42px;
+    }
+
+    .project-carousel-button svg {
+      width: 25px;
+      height: 25px;
+      stroke-width: 3.4;
+    }
+
+    .project-carousel-prev {
+      left: 6px;
+    }
+
+    .project-carousel-next {
+      right: 6px;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const carousels = document.querySelectorAll("[data-project-carousel]");
+
+    carousels.forEach(function (carousel) {
+      if (carousel.dataset.ready === "true") {
+        return;
+      }
+
+      carousel.dataset.ready = "true";
+
+      const track = carousel.querySelector(".project-carousel-track");
+      const slides = carousel.querySelectorAll(".project-carousel-slide");
+      const prevButton = carousel.querySelector(".project-carousel-prev");
+      const nextButton = carousel.querySelector(".project-carousel-next");
+
+      if (!track || slides.length === 0 || !prevButton || !nextButton) {
+        return;
+      }
+
+      let currentIndex = 0;
+
+      function updateCarousel() {
+        track.style.transform = "translateX(-" + currentIndex * 100 + "%)";
+      }
+
+      nextButton.addEventListener("click", function () {
+        currentIndex = (currentIndex + 1) % slides.length;
+        updateCarousel();
+      });
+
+      prevButton.addEventListener("click", function () {
+        currentIndex = (currentIndex - 1 + slides.length) % slides.length;
+        updateCarousel();
+      });
+
+      updateCarousel();
+    });
+  });
+</script>

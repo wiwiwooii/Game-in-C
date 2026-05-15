@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ .Title }} · Изучение Русского Языка как Иностранного</title>
+  <link rel="stylesheet" href="/css/style.css" />
+
+  <style>
+    pre,
+    .content-panel pre,
+    .highlight pre,
+    pre.chroma,
+    .highlight .chroma {
+      margin: 22px 0 38px !important;
+      padding: 24px 26px !important;
+      background: linear-gradient(135deg, #eef3ff, #dfe8ff) !important;
+      border: 1px solid rgba(79, 124, 255, 0.24) !important;
+      border-radius: 22px !important;
+      color: #1f2933 !important;
+      box-shadow: 0 18px 44px rgba(79, 124, 255, 0.12) !important;
+      overflow-x: auto !important;
+      white-space: pre !important;
+    }
+
+    pre code,
+    .content-panel pre code,
+    .highlight code,
+    .chroma code,
+    .chroma span {
+      background: transparent !important;
+      color: #1f2933 !important;
+      font-family: Consolas, "Courier New", monospace !important;
+      font-size: 15px !important;
+      line-height: 1.65 !important;
+      padding: 0 !important;
+      border: none !important;
+      text-shadow: none !important;
+    }
+
+    .content-panel code:not(pre code) {
+      padding: 3px 7px !important;
+      background: rgba(79, 124, 255, 0.12) !important;
+      color: #315bdc !important;
+      border-radius: 8px !important;
+      font-family: Consolas, "Courier New", monospace !important;
+      font-size: 0.95em !important;
+    }
+
+    .content-panel img {
+      display: block !important;
+      max-width: 280px !important;
+      width: 100% !important;
+      height: auto !important;
+      margin: 24px auto 34px !important;
+      padding: 0 !important;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      border-radius: 0 !important;
+    }
+
+    .photo-carousel img,
+    .project-carousel img {
+      max-width: 100% !important;
+      margin: 0 !important;
+    }
+
+    .back-to-journal {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      margin-bottom: 28px;
+      padding: 13px 18px;
+
+      border-radius: 16px;
+      color: #ffffff !important;
+      background: linear-gradient(135deg, #4f7cff, #315bdc);
+      box-shadow: 0 14px 30px rgba(79, 124, 255, 0.24);
+
+      font-size: 15px;
+      font-weight: 900;
+      text-decoration: none !important;
+
+      transition: 0.2s ease;
+    }
+
+    .back-to-journal:hover {
+      transform: translateY(-2px);
+      text-decoration: none !important;
+      box-shadow: 0 18px 40px rgba(79, 124, 255, 0.32);
+    }
+
+    .post-navigation-bottom {
+      margin-top: 42px;
+      padding-top: 26px;
+      border-top: 1px solid rgba(31, 41, 51, 0.1);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="background-shape shape-one"></div>
+  <div class="background-shape shape-two"></div>
+  <div class="background-grid"></div>
+
+  <header class="header">
+    <nav class="nav">
+      <a href="/" class="nav-link">Главная</a>
+
+      <a href="/about/" class="nav-link {{ if eq .RelPermalink "/about/" }}active{{ end }}">
+        О проекте
+      </a>
+
+      <a href="/team/" class="nav-link {{ if eq .RelPermalink "/team/" }}active{{ end }}">
+        Участники
+      </a>
+
+      <a href="/journal/" class="nav-link {{ if or (eq .RelPermalink "/journal/") (eq .Section "journal") }}active{{ end }}">
+        Журнал
+      </a>
+
+      <a href="/resources/" class="nav-link {{ if eq .RelPermalink "/resources/" }}active{{ end }}">
+        Ресурсы
+      </a>
+    </nav>
+  </header>
+
+  <main class="inner-page">
+    <section class="content-panel card">
+      {{ if eq .Section "journal" }}
+        <a href="/journal/" class="back-to-journal">
+          Вернуться к журналу
+        </a>
+      {{ end }}
+
+      {{ .Content }}
+
+      {{ if eq .Section "journal" }}
+        <div class="post-navigation-bottom">
+          <a href="/journal/" class="back-to-journal">
+            Вернуться к журналу
+          </a>
+        </div>
+      {{ end }}
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>Проектная деятельность</span>
+    <span>Изучение Русского Языка как Иностранного · 2026</span>
+  </footer>
+
+  <script src="/js/carousel.js"></script>
+</body>
+</html>
