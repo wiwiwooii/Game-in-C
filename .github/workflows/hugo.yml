@@ -34,57 +34,43 @@ jobs:
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
-      - name: Build site
-        run: hugo --source site --baseURL "https://wiwiwooii.github.io/Game-in-C/"
+      - name: Build site with drafts
+        run: hugo --source site --baseURL "https://wiwiwooii.github.io/Game-in-C/" --buildDrafts
 
-      - name: Fix all absolute paths for GitHub Pages
+      - name: Fix GitHub Pages asset paths
         run: |
           python3 - <<'PY'
           from pathlib import Path
           import re
 
-          base = "Game-in-C"
           root = Path("site/public")
-          exts = {".html", ".xml", ".css", ".js"}
+          prefix = "/Game-in-C/"
 
           for path in root.rglob("*"):
-              if path.suffix.lower() not in exts:
+              if path.suffix.lower() not in [".html", ".css", ".js", ".xml"]:
                   continue
 
               text = path.read_text(encoding="utf-8", errors="ignore")
 
               text = re.sub(
                   r'(\b(?:href|src)=["\'])/(?!Game-in-C/|/)',
-                  rf'\1/{base}/',
+                  r'\1' + prefix,
                   text
               )
 
               text = re.sub(
                   r'(\b(?:href|src)=)/(?!Game-in-C/|/)',
-                  rf'\1/{base}/',
+                  r'\1' + prefix,
                   text
               )
 
               text = re.sub(
                   r'url\(/(?!Game-in-C/|/)',
-                  rf'url(/{base}/',
+                  'url(' + prefix,
                   text
               )
 
-              text = text.replace(
-                  "https://wiwiwooii.github.io/",
-                  "https://wiwiwooii.github.io/Game-in-C/"
-              )
-
-              text = text.replace(
-                  "https://wiwiwooii.github.io/Game-in-C/Game-in-C/",
-                  "https://wiwiwooii.github.io/Game-in-C/"
-              )
-
-              text = text.replace(
-                  "/Game-in-C/Game-in-C/",
-                  "/Game-in-C/"
-              )
+              text = text.replace("/Game-in-C/Game-in-C/", "/Game-in-C/")
 
               path.write_text(text, encoding="utf-8")
           PY
