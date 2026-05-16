@@ -37,12 +37,57 @@ jobs:
       - name: Build site
         run: hugo --source site --baseURL "https://wiwiwooii.github.io/Game-in-C/"
 
-      - name: Fix absolute paths for GitHub Pages
+      - name: Fix all absolute paths for GitHub Pages
         run: |
-          find site/public -name "*.html" -type f -exec sed -i \
-            -e 's#href="/#href="/Game-in-C/#g' \
-            -e 's#src="/#src="/Game-in-C/#g' \
-            -e 's#url(/#url(/Game-in-C/#g' {} +
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          base = "Game-in-C"
+          root = Path("site/public")
+          exts = {".html", ".xml", ".css", ".js"}
+
+          for path in root.rglob("*"):
+              if path.suffix.lower() not in exts:
+                  continue
+
+              text = path.read_text(encoding="utf-8", errors="ignore")
+
+              text = re.sub(
+                  r'(\b(?:href|src)=["\'])/(?!Game-in-C/|/)',
+                  rf'\1/{base}/',
+                  text
+              )
+
+              text = re.sub(
+                  r'(\b(?:href|src)=)/(?!Game-in-C/|/)',
+                  rf'\1/{base}/',
+                  text
+              )
+
+              text = re.sub(
+                  r'url\(/(?!Game-in-C/|/)',
+                  rf'url(/{base}/',
+                  text
+              )
+
+              text = text.replace(
+                  "https://wiwiwooii.github.io/",
+                  "https://wiwiwooii.github.io/Game-in-C/"
+              )
+
+              text = text.replace(
+                  "https://wiwiwooii.github.io/Game-in-C/Game-in-C/",
+                  "https://wiwiwooii.github.io/Game-in-C/"
+              )
+
+              text = text.replace(
+                  "/Game-in-C/Game-in-C/",
+                  "/Game-in-C/"
+              )
+
+              path.write_text(text, encoding="utf-8")
+          PY
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
