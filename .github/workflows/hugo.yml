@@ -37,9 +37,12 @@ jobs:
       - name: Build site
         run: hugo --source site --baseURL "https://wiwiwooii.github.io/Game-in-C/" --minify
 
-      - name: Fix paths for GitHub Pages
+      - name: Fix absolute paths for GitHub Pages
         run: |
-          find site/public -name "*.html" -type f -exec sed -i 's#href="/#href="/Game-in-C/#g; s#src="/#src="/Game-in-C/#g' {} +
+          find site/public -name "*.html" -type f -exec sed -i \
+            -e 's#href="/#href="/Game-in-C/#g' \
+            -e 's#src="/#src="/Game-in-C/#g' \
+            -e 's#url(/#url(/Game-in-C/#g' {} +
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
