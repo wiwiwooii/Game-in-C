@@ -35,7 +35,7 @@ jobs:
         uses: actions/configure-pages@v5
 
       - name: Build site
-        run: hugo --source site --baseURL "https://wiwiwooii.github.io/Game-in-C/" --minify
+        run: hugo --source site --baseURL "https://wiwiwooii.github.io/Game-in-C/"
 
       - name: Fix absolute paths for GitHub Pages
         run: |
