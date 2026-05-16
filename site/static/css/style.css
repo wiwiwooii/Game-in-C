@@ -290,7 +290,7 @@ h1 span {
   font-size: 14px;
 }
 
-/* внутренние страницы */
+
 
 .inner-page {
   width: min(1000px, calc(100% - 32px));
@@ -479,7 +479,7 @@ h1 span {
   
 }
 
-/* фикс высоты главного блока после удаления верхней плашки */
+ 
 .hero-content {
   min-height: 560px;
   display: flex;
@@ -487,12 +487,10 @@ h1 span {
   justify-content: center;
 }
 
-/* выравнивание текста справа в блоке целевой аудитории */
 .wide-section > p {
   margin-top: 47px !important;
 }
 
-/* ===== НОРМАЛЬНЫЙ ЖУРНАЛ: карточки постов ===== */
 
 .journal-page {
   width: min(1120px, calc(100% - 32px)) !important;
@@ -633,7 +631,7 @@ h1 span {
   line-height: 1;
 }
 
-/* убираем старые подчёркивания внутри журнала */
+
 .news-card a,
 .news-card h2,
 .news-card p,
@@ -642,7 +640,7 @@ h1 span {
   text-decoration: none !important;
 }
 
-/* адаптив */
+
 @media (max-width: 760px) {
   .journal-main {
     padding: 28px !important;
@@ -662,7 +660,7 @@ h1 span {
     font-size: 28px !important;
   }
 } 
-/* ===== красивое оформление блоков кода ===== */
+
 
 .content-panel pre {
   margin: 22px 0 38px;
@@ -704,7 +702,7 @@ h1 span {
   font-size: 0.95em;
 }
 
-/* ===== маскот справа, текст слева ===== */
+
 
 .content-panel img[alt="Маскот приложения — медведь в красном шарфе"] {
   float: right;
@@ -738,7 +736,6 @@ h1 span {
   }
 }
 
-/* ===== блок с маскотом в посте ===== */
 
 .mascot-layout {
   margin: 30px 0 42px;
@@ -805,7 +802,7 @@ h1 span {
     max-width: 240px !important;
   }
 }
-/* ===== улучшение оформления маркетинговых постов ===== */
+
 
 .content-panel blockquote {
   margin: 28px 0;
@@ -841,7 +838,7 @@ h1 span {
   background: rgba(255, 255, 255, 0.62);
 }
 
-.content-panel hr {
+.content-panel   hr {
   margin: 38px 0;
   border: none;
   height: 1px;
